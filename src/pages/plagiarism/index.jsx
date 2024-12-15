@@ -3,54 +3,68 @@ import { Button, Box, Container } from "@mui/material";
 import axios from "axios";
 import { Bar } from "react-chartjs-2";
 import CustomPieChart from "../../components/PieChart/PieChart";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 const PlagiarismPage = () => {
   const [file, setFile] = useState(null);
   const [plagiarismRate, setPlagiarismRate] = useState(null);
   const [originalityRate, setOriginalityRate] = useState(null);
-  const [textContent, setTextContent] = useState("");
+  const [link, setLink] = useState("");
+  const [id, setId] = useState("");
+  const [key, setKey] = useState("");
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      // Lưu nội dung tệp vào state
-      setTextContent(e.target.result);
-    };
-
-    // Kiểm tra loại tệp
-    if (file.type === "text/plain") {
-      reader.readAsText(file); // Đọc tệp dưới dạng văn bản
-    } else {
-      alert("Vui lòng tải lên tệp TXT!");
-    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault(); // Ngăn chặn tải lại trang
 
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+    let data = JSON.stringify({
+      url: "https://vi.wikipedia.org/wiki/B%C3%AD_t%C3%ADch_H%C3%B2a_Gi%E1%BA%A3i",
+    });
 
-    const requestOptions = {
-      method: "GET",
-      headers: myHeaders,
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "http://localhost:8080/plagiarism/add-document",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: data,
     };
 
-    fetch("http://localhost:8080/plagiarism/9135069", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        let data = JSON.parse(result);
-        console.log(data);
-        setPlagiarismRate(data.data.data.plagiarism);
-        setOriginalityRate(data.data.data.originality);
+    axios
+      .request(config)
+      .then((response) => {
+        const documentId = response.data.data;
+        setId(documentId);
+        getDocument(id); //9148065
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const getDocument = (id) => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://localhost:8080/plagiarism/${id}`,
+      headers: {},
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data.data.data);
+        const key = response.data.data.data.auth_key;
+        setKey(key);
+        const link = `https://plagiarismsearch.com/r/${id}?key=${key}`;
+        setLink(link);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
@@ -64,16 +78,15 @@ const PlagiarismPage = () => {
           Kiem tra
         </Button>
       </Box>
-      {plagiarismRate && (
+      {link && (
         <Box sx={{ mt: 2 }}>
           <p>plagiarism rate: {plagiarismRate} </p>
           <p>originality rate: {originalityRate}</p>
           <Link
-            to={
-              "https://plagiarismsearch.com/r/9135069?key=9c9b5b9451a8173402cd8bbcb4be9ad9"
-            }
+            to={`https://plagiarismsearch.com/r/${id}?key=${key}`}
+            accessKey="bien.nd203327@sis.hust.edu.vn:F36O6VSpQEAjqDVpz94d3MB6BPELxZQUO6CRcBOmUK3WVPXT9EoKgW-219039683"
           >
-            Bam vao link de xem bao cao chi tiet
+            {`https://plagiarismsearch.com/r/${id}?key=${key}`}
           </Link>
         </Box>
       )}

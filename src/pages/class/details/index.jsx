@@ -30,7 +30,7 @@ const ClassDetail = () => {
           <p className="p-4">Class ID: {classRoom.id}</p>
           <p className="p-4">Class Name: {classRoom.name}</p>
           <p className="p-4">Class Description: {classRoom.description}</p>
-          <p className="p-4">Teacher: {classRoom.teacherq}</p>
+          <p className="p-4">Teacher: {classRoom.teacher}</p>
         </div>
       </div>
       <div>
@@ -47,6 +47,5 @@ const ClassDetail = () => {
     </Container>
   );
 };
-z;
 
 export default ClassDetail;
