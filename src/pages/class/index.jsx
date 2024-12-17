@@ -12,6 +12,9 @@ import { Box } from "@mui/material";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 // const classRooms = [
 //   {
@@ -71,9 +74,6 @@ function createData(id, name, description) {
 const handleClose = () => {
   setOpen(false);
 };
-const handleOpen = () => {
-  setOpen(true);
-};
 
 const rows = [
   createData(
@@ -100,13 +100,18 @@ const rows = [
     "5",
     "Lớp Tiếng Anh 11E",
     "Lớp học dành cho học sinh lớp 11, tập trung vào giao tiếp và ngữ pháp tiếng Anh."
-  ),
+  )
 ];
 
+
 const ClassPage = () => {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [open, setOpen] = React.useState(false);
+  const location = useLocation();
+  const formData = location.state;
+  const [newRows, setNewRows] = React.useState([...rows]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -117,9 +122,18 @@ const ClassPage = () => {
     setPage(0);
   };
 
+  const handleOpen = () => {
+    setOpen(true);
+    navigate("/class-room/created");
+  };
+
+  useEffect(() => {
+    setNewRows([...newRows,createData(formData.id, formData.name, formData.description)])
+  }, [formData]);
+
   return (
     <Box>
-      <Button onClick={handleOpen}>them moi</Button>
+      <Button onClick={handleOpen}>THÊM MỚI</Button>
       <Backdrop
         sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
         open={open}
@@ -144,7 +158,7 @@ const ClassPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows
+              {newRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, key) => {
                   return (

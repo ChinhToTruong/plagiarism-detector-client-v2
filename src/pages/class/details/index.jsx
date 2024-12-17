@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const classRoom = {
   id: "1",
-  name: "L��p Toán 10A",
+  name: "Lớp Toán 10A",
   description: "aaaaaa",
   teacher: "Teacher 1",
   students: [
@@ -30,7 +30,7 @@ const ClassDetail = () => {
           <p className="p-4">Class ID: {classRoom.id}</p>
           <p className="p-4">Class Name: {classRoom.name}</p>
           <p className="p-4">Class Description: {classRoom.description}</p>
-          <p className="p-4">Teacher: {classRoom.teacherq}</p>
+          <p className="p-4">Teacher: {classRoom.teacher}</p>
         </div>
       </div>
       <div>
@@ -47,6 +47,4 @@ const ClassDetail = () => {
     </Container>
   );
 };
-z;
-
 export default ClassDetail;

@@ -7,6 +7,7 @@ import ProfilePage from "../pages/profile";
 import PlagiarismPage from "../pages/plagiarism";
 import ClassPage from "../pages/class";
 import ClassDetail from "../pages/class/details";
+import CreatedForm from "../pages/class/createdClass";
 
 const routers = createBrowserRouter([
   {
@@ -69,6 +70,14 @@ const routers = createBrowserRouter([
     element: (
       <LazyLoad>
         <ErrorPage />
+      </LazyLoad>
+    ),
+  },
+  {
+    path: "/class-room/created",
+    element: (
+      <LazyLoad>
+        <CreatedForm />
       </LazyLoad>
     ),
   },

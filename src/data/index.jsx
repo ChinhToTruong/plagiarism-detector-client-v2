@@ -1,3 +1,3 @@
-export const class = {
+// export const class = {
 
-}
+// }
