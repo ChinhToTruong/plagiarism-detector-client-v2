@@ -1,9 +1,40 @@
 import { useState } from "react";
-import { Button, Box, Container } from "@mui/material";
+import { Button, Box, Container, TextField, Divider } from "@mui/material";
 import axios from "axios";
-import { Bar } from "react-chartjs-2";
-import CustomPieChart from "../../components/PieChart/PieChart";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+const TYPE_BOX = {
+  url: "url",
+  text: "text",
+  file: "file",
+};
+
+const renderComponent = (type) => {
+  switch (type) {
+    case TYPE_BOX.file:
+      return <input type="file" />;
+
+    case TYPE_BOX.text:
+      return (
+        <TextField
+          variant="outlined"
+          fullWidth
+          placeholder="Nhập chữ tại đây..."
+          margin="normal"
+        />
+      );
+
+    case TYPE_BOX.url:
+      return (
+        <TextField
+          variant="outlined"
+          fullWidth
+          placeholder="Nhập duong dan..."
+          margin="normal"
+        />
+      );
+  }
+};
 
 const PlagiarismPage = () => {
   const [file, setFile] = useState(null);
@@ -12,10 +43,7 @@ const PlagiarismPage = () => {
   const [link, setLink] = useState("");
   const [id, setId] = useState("");
   const [key, setKey] = useState("");
-
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
+  const [typeBox, setTypeBox] = useState(TYPE_BOX.text);
 
   const handleSubmit = async (event) => {
     event.preventDefault(); // Ngăn chặn tải lại trang
@@ -37,8 +65,12 @@ const PlagiarismPage = () => {
     axios
       .request(config)
       .then((response) => {
+        console.log(response);
+
         const documentId = response.data.data;
         setId(documentId);
+
+        console.log(id);
         getDocument(id); //9148065
       })
       .catch((error) => {
@@ -51,7 +83,9 @@ const PlagiarismPage = () => {
       method: "get",
       maxBodyLength: Infinity,
       url: `http://localhost:8080/plagiarism/${id}`,
-      headers: {},
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
     axios
       .request(config)
@@ -72,11 +106,24 @@ const PlagiarismPage = () => {
       maxWidth={"xl"}
       className="min-h-60 h-auto shadow-xl rounded-md flex justify-between"
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-        <input type="file" onChange={handleFileChange} required />
-        <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-          Kiem tra
-        </Button>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ mt: 2 }}
+        className="w-full"
+      >
+        <div id="content" className="py-4">
+          {renderComponent(typeBox)}
+        </div>
+        <div
+          id="footer"
+          className="flex justify-between items-center px-16 py-4"
+        >
+          <div id="footer-option">option</div>
+          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+            Kiem tra
+          </Button>
+        </div>
       </Box>
       {link && (
         <Box sx={{ mt: 2 }}>
