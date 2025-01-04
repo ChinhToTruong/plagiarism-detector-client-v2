@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Box, Container, TextField } from "@mui/material";
 import axios from "axios";
 import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
@@ -12,64 +12,73 @@ const TYPE_BOX = {
 };
 
 const PlagiarismPage = () => {
-  const [requestBodyData, setRequestBodyData] = useState(null);
+  const requestBodyData = useRef(null);
   const [response, setRespone] = useState(null);
   const [typeBox, setTypeBox] = useState(TYPE_BOX.file);
-  const [fileContent, setFileContent] = useState("");
+  // const [fileContent, setFileContent] = useState("");
+
+  const fileContent = useRef("");
   const [sentences, setSentences] = useState([]);
 
   // Hàm để phân tách nội dung thành các câu và xử lý in đậm
   const processContent = (content) => {
     // Phân tách nội dung thành các câu
     const sentenceArray = content.split(/(?<=\.)\s*/); // Phân tách tại dấu chấm và khoảng trắng
-
+    console.log("array", sentenceArray)
     return sentenceArray.map((sentence, index) => {
       // Kiểm tra nếu câu này có trong mảng sentences
-      const isBold = sentences.some((s) => sentence.includes(s));
-
+      console.log("sentences: ", sentences)
+      console.log("sentence:", sentence)
+      let isBold = false
+      sentences.forEach(item => {
+        if (sentence.includes(item))
+          isBold= true
+      }) //false
+      console.log(isBold)
       // Nếu câu trùng với mảng sentences, in đậm câu đó
       return (
         <span key={index}>
-          {isBold ? <strong>{sentence}</strong> : sentence}
+          {<p className={isBold ? "text-red-500" : ""}>{sentence}</p>}
           <br />
         </span>
       );
     });
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit =  (event, bodyData) => {
     event.preventDefault(); // Ngăn chặn tải lại trang
 
     const data = {};
     const form = new FormData();
+    console.log("request body data",bodyData )
     switch (typeBox) {
       case TYPE_BOX.url:
-        data.url = requestBodyData;
+        data.url = bodyData;
         break;
       case TYPE_BOX.text:
-        data.text = requestBodyData;
+        data.text = bodyData;
         break;
       case TYPE_BOX.file:
-        form.append("file", requestBodyData);
+        form.append("file", bodyData);
         break;
     }
 
-    console.log(form);
 
     axios
       .post("http://localhost:8080/file/detect", form)
       .then((response) => {
-        console.log("file: ", response.data);
+        console.log("detect response: ", response.data.data);
+        let sentenceList = response.data.data.sentences.map(item => item.sentence)
 
         setRespone(response.data);
-        setSentences(response.data.sentences);
+        setSentences(sentenceList);
       })
       .catch((error) => {
-        console.log(error);
+        
       });
   };
   const renderComponent = (type) => {
-    console.log(type);
+    // console.log(type);
 
     const handleChangeInput = (e) => {
       const typeInput = e.target.type;
@@ -81,25 +90,28 @@ const PlagiarismPage = () => {
 
         // Đọc nội dung file dưới dạng văn bản
         reader.onload = function (e) {
-          setFileContent(e.target.result);
+          // setFileContent(e.target.result);
+          fileContent.current = e.target.result
         };
 
         // Đọc file
         reader.readAsText(file);
       }
 
-      setRequestBodyData(null);
+
       switch (typeInput) {
         case "file":
-          e.target?.files?.[0] && setRequestBodyData(e.target.files[0]);
+          e.target?.files?.[0] && (requestBodyData.current = (e.target.files[0]));
           break;
         case "text":
-          setRequestBodyData(e.target.value);
+          requestBodyData.current = (e.target.value);
           break;
         case "url":
-          setRequestBodyData(e.target.value);
+          requestBodyData.current = (e.target.value);
           break;
       }
+
+      console.log(typeInput)
     };
 
     switch (type) {
@@ -137,7 +149,7 @@ const PlagiarismPage = () => {
     >
       <Box
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={(e) => handleSubmit(e, requestBodyData.current )}
         sx={{ mt: 2 }}
         className="w-full"
       >
@@ -203,7 +215,7 @@ const PlagiarismPage = () => {
 
           <div id="refer">
             {response.data.sentences.forEach((item) => {
-              console.log(item);
+              // console.log(item);
               return (
                 <p className="p-4 text-center text-black-500 hover:text-blue-500 cursor-pointer">
                   {item.sentence}
@@ -221,8 +233,8 @@ const PlagiarismPage = () => {
         className="w-full max-w-2xl p-4 border rounded-md bg-gray-50"
         style={{ whiteSpace: "pre-wrap" }}
       >
-        {fileContent
-          ? processContent(fileContent)
+        {fileContent.current
+          ? processContent(fileContent.current)
           : "Vui lòng chọn một tệp để hiển thị nội dung."}
       </Box>
     </Container>
